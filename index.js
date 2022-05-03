@@ -226,17 +226,17 @@ const crawlerWoori = async (list) => {
 }
 
 
-cron.schedule('0 * * * *', function(){
-  console.log('cron start');
-  main();
-});
+// cron.schedule('0 * * * *', function(){
+//   console.log('cron start');
+//   main();
+// });
 
-cron.schedule('30 * * * *', function(){
-  console.log('cron start');
-  main();
-});
+// cron.schedule('30 * * * *', function(){
+//   console.log('cron start');
+//   main();
+// });
 
-
+main();
 
 async function getAll(page, index) {
     let data = [];
