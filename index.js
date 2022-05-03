@@ -82,7 +82,8 @@ async function sleep(miliseconds) {
 async function main() {
     const browser = await puppeteer.launch({
         headless : true,
-        defaultViewport: false
+        defaultViewport: false,
+        args: ['--no-sandbox', '--disable-setuid-sandbox']
     });
     const page = await browser.newPage();
     const naver_id = ID;
@@ -225,12 +226,12 @@ const crawlerWoori = async (list) => {
 }
 
 
-cron.schedule('20 * * * *', function(){
+cron.schedule('0 * * * *', function(){
   console.log('cron start');
   main();
 });
 
-cron.schedule('50 * * * *', function(){
+cron.schedule('30 * * * *', function(){
   console.log('cron start');
   main();
 });
