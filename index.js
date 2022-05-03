@@ -2,7 +2,6 @@ const puppeteer = require('puppeteer');
 const cheerio = require('cheerio');
 const { google } = require('googleapis');
 const keys = require('./woori-344909-41d58b6f283d.json');
-const woori_client_data = require('./woori_client.json');
 const dayjs = require('dayjs');
 const timezone = require('dayjs/plugin/timezone');
 const utc = require('dayjs/plugin/utc');
