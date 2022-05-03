@@ -225,12 +225,12 @@ const crawlerWoori = async (list) => {
 }
 
 
-cron.schedule('20 * * * *', function(){
+cron.schedule('30 * * * *', function(){
   console.log('cron start');
   main();
 });
 
-cron.schedule('50 * * * *', function(){
+cron.schedule('0 * * * *', function(){
   console.log('cron start');
   main();
 });
