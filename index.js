@@ -150,6 +150,8 @@ const crawlerWoori = async (list) => {
   //     );
   //     return result;
   // });
+
+  // console.log(list);
   
   let listing = list.map((el) => {
       let result = [];
@@ -157,20 +159,23 @@ const crawlerWoori = async (list) => {
           el.serviceName,
           el.name,
           el.bizItemName,
-        //   el.bookingGuide,
-        //   el.snapshotJson.bookingPrecaution,
           el.snapshotJson.startDateTime,
           el.snapshotJson.endDateTime,
           el.snapshotJson.bookingCount,
           el.phone,
           el.price,
           el.snapshotJson.businessId,
-          el.snapshotJson.businessAddressJson.detail
+          el.snapshotJson.businessAddressJson.roadAddr,
+          el.bookingGuide,
+          el.snapshotJson.bookingPrecaution,
+          el.snapshotJson.businessAddressJson
       );
       return result;
   });
 
   client.authorize(async (err, tokens) => {
+
+    // console.log(listing);
 
     let filtered_list = listing.map(el => {
       return {
@@ -181,31 +186,87 @@ const crawlerWoori = async (list) => {
           "sdiff": dayjs(el[3]).tz("Asia/Seoul").diff(dayjs(new Date()).tz("Asia/Seoul"), 'm'),
           "ediff": dayjs(el[4]).tz("Asia/Seoul").diff(dayjs(new Date()).tz("Asia/Seoul"), 'm'),
           "detail": el[9],
-          "name": el[0]
+          "name": el[0],
+          "user": el[1],
+          "start": dayjs(el[3]).tz("Asia/Seoul").format('MM월DD일 HH:mm'),
+          "end": dayjs(el[4]).tz("Asia/Seoul").format('MM월DD일 HH:mm'),
+          "guide": el[10],
+          "bookingPrecaution": el[11]
       }
     });
 
-    console.log(filtered_list);
+    // console.log(filtered_list);
 
     filtered_list.forEach(function(el) {
-      if (el.sdiff < 30 && el.sdiff >= 0) {
+      if (el.sdiff <= 30 && el.sdiff >= 25) {
         console.log(`${el.phone} 에게 시작 메세지 보냄`);
+        // messageService.sendOne({
+        //   to: "01086122382",
+        //   from: "01086122382",
+        //   text: `${el.phone} 님 우리끼리 ${el.name}를 이용해주셔서 감사합니다.\n\n[매장위치]${el.detail}\n\nhttp://pf.kakao.com/_pFUPb 카카오채널을 통해 더 많은 혜택을 받아보세요`,
+        //   subject: "우리끼리 이용안내" // LMS, MMS 전용 옵션, SMS에서 해당 파라미터 추가될 경우 자동으로 LMS 변경처리 됨
+        // }).then(res => console.log(res));
         messageService.sendOne({
-          to: "01056552997",
+          to: el.phone,
           from: "01086122382",
-          text: `${el.phone} 님 우리끼리 ${el.name}를 이용해주셔서 감사합니다.\n\n[매장위치]${el.detail}\n\nhttp://pf.kakao.com/_pFUPb 카카오채널을 통해 더 많은 혜택을 받아보세요`,
-          subject: "우리끼리 이용안내" // LMS, MMS 전용 옵션, SMS에서 해당 파라미터 추가될 경우 자동으로 LMS 변경처리 됨
+          kakaoOptions: {
+            pfId: "KA01PF220419075235290d7ney7pyJmF",
+            templateId: "KA01TP220503132831045bnhGt7V9VT9",
+            variables: {
+              "#{이름}": el.user,
+              "#{시작}": el.start,
+              "#{매장}": el.name,
+              "#{종료}": el.end,
+              "#{주소}": el.detail,
+              "#{주의사항}": "입장과 퇴실시간을 준수해주세요.\n 이용 후, 정리정돈을 하고 퇴실해주세요. \n가져오신 음식포장용기와 남은음식, 그리고, 쓰레기봉투를 가져가실 경우에 한해서, 외부 음식반입이 가능합니다.\n 쾌적한 우리끼리를 위해 꼭!! 지켜주세요\n",
+              "#{비밀번호}": el.guide
+            }
+            // 치환문구가 있는 경우 추가, 반드시 key, value 모두 string으로 기입해야 합니다.
+            /*
+            variables: {
+              "#{변수명}": "임의의 값"
+            }
+            */
+            // disbaleSms 값을 true로 줄 경우 문자로의 대체발송이 비활성화 됩니다.
+            // disableSms: true,
+          }
         }).then(res => console.log(res));
+
       }
     });
 
     filtered_list.forEach(function(el) {
-      if (el.ediff < 30 && el.ediff >= 0) {
+      if (el.ediff <= 10 && el.ediff >= 5) {
+        console.log(`${el.phone} 에게 종료 메세지 보냄`);
+        // messageService.sendOne({
+        //   to: "01086122382",
+        //   from: "01086122382",
+        //   text: `${el.phone} 님 우리끼리 ${el.name}를 이용해주셔서 감사합니다.\n\n http://pf.kakao.com/_pFUPb 카카오채널을 통해 더 많은 혜택을 받아보세요`,
+        //   subject: "우리끼리 이용안내" // LMS, MMS 전용 옵션, SMS에서 해당 파라미터 추가될 경우 자동으로 LMS 변경처리 됨
+        // }).then(res => console.log(res));
         messageService.sendOne({
-          to: "01086122382",
+          to: el.phone,
           from: "01086122382",
-          text: `${el.phone} 님 우리끼리 ${el.name}를 이용해주셔서 감사합니다.\n\n http://pf.kakao.com/_pFUPb 카카오채널을 통해 더 많은 혜택을 받아보세요`,
-          subject: "우리끼리 이용안내" // LMS, MMS 전용 옵션, SMS에서 해당 파라미터 추가될 경우 자동으로 LMS 변경처리 됨
+          kakaoOptions: {
+            pfId: "KA01PF220419075235290d7ney7pyJmF",
+            templateId: "KA01TP220517022119509GHeVmSwabzQ",
+            variables: {
+              "#{이름}": el.user,
+              "#{매장}": el.name,
+              "#{시작}": el.start,
+              "#{종료}": el.end,
+              "#{주소}": el.detail,
+              "#{주의사항}": "입장과 퇴실시간을 준수해주세요.\n 이용 후, 정리정돈을 하고 퇴실해주세요. \n가져오신 음식포장용기와 남은음식, 그리고, 쓰레기봉투를 가져가실 경우에 한해서, 외부 음식반입이 가능합니다.\n 쾌적한 우리끼리를 위해 꼭!! 지켜주세요\n"
+            }
+            // 치환문구가 있는 경우 추가, 반드시 key, value 모두 string으로 기입해야 합니다.
+            /*
+            variables: {
+              "#{변수명}": "임의의 값"
+            }
+            */
+            // disbaleSms 값을 true로 줄 경우 문자로의 대체발송이 비활성화 됩니다.
+            // disableSms: true,
+          }
         }).then(res => console.log(res));
       }
     });
@@ -226,17 +287,26 @@ const crawlerWoori = async (list) => {
 }
 
 
-// cron.schedule('0 * * * *', function(){
-//   console.log('cron start');
-//   main();
-// });
+cron.schedule('0 * * * *', function(){
+  console.log('cron start');
+  main();
+});
+cron.schedule('20 * * * *', function(){
+  console.log('cron start');
+  main();
+});
 
-// cron.schedule('30 * * * *', function(){
-//   console.log('cron start');
-//   main();
-// });
+cron.schedule('30 * * * *', function(){
+  console.log('cron start');
+  main();
+});
 
-main();
+cron.schedule('50 * * * *', function(){
+  console.log('cron start');
+  main();
+});
+
+// main();
 
 async function getAll(page, index) {
     let data = [];
